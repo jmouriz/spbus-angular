@@ -1,13 +1,61 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <title>Webapp</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="../cordova.js"></script>
 </head>
-<body>
+<body class="mat-typography">
   <app-root></app-root>
 </body>
 </html>
+<script>
+  console.log(cordova);
+
+  if (cordova) {
+    document.addEventListener('deviceready', function() {
+      console.log('Cordova detected');
+      
+      window.ready = true;
+
+      if (device.platform == 'iOS') {
+        return;
+      }
+
+      var permissions = cordova.plugins.permissions;
+
+      console.log(permissions);
+      
+      var list = [
+        permissions.ACCESS_FINE_LOCATION,
+        permissions.ACCESS_COARSE_LOCATION,
+        permissions.ACCESS_LOCATION_EXTRA_COMMANDS,
+      ];
+      
+      //permissions.hasPermission(list, success, null);
+      permissions.checkPermission(list, success, null);
+      
+      function error() {
+        console.warn('Geolocation permission is turned off');
+      }
+      
+      function success(status) {
+        if (!status.hasPermission) {
+          permissions.requestPermissions(
+            list,
+            function(status) {
+              if (!status.hasPermission) error();
+            }, error
+          );
+        }
+      }
+    });
+  }
+</script>

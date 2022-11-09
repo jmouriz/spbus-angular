@@ -1,0 +1,42 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport mode="over" (openedChange)="toggle(drawer.opened)">
+    <mat-toolbar class="foreground-color">
+      <span class="title">SPbus</span>
+      <button mat-button *ngIf="opened" class="menu-button close-button" color="primary" (click)="drawer.toggle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar>
+    <mat-nav-list>
+      <hr/>
+      <a mat-list-item class="foreground-color" (click)="toggleBus()">
+        BUS <mat-icon class="suffix">{{bus ? 'expand_less' : 'expand_more'}}</mat-icon>
+      </a>
+      <hr/>
+      <div class="submenu" *ngIf="bus">
+        <a mat-list-item class="right" routerLink="map" href="#">¿DÓNDE ESTÁ?</a>
+        <a mat-list-item class="right" routerLink="routes" href="#">RECORRIDOS</a>
+        <!-- a mat-list-item class="right" href="#">PARADAS</a -->
+        <hr/>
+      </div>
+      <a mat-list-item class="foreground-color" (click)="toggleSube()">
+        SUBE <mat-icon class="suffix">{{sube ? 'expand_less' : 'expand_more'}}</mat-icon>
+      </a>
+      <hr/>
+      <div class="submenu" *ngIf="sube">
+        <a mat-list-item class="right" href="https://tarjetasube.sube.gob.ar/subeweb/WebForms/admin/views/mapa-sube.aspx">PUNTOS DE CARGA</a>
+        <a mat-list-item class="right" href="https://tarjetasube.sube.gob.ar">SALDO</a>
+        <hr/>
+      </div>
+      <a mat-list-item class="foreground-color" href="https://apps.saenzpeña.gob.ar">AUTOGESTIÓN</a>
+      <hr/>
+      <a mat-list-item class="foreground-color" href="https://saenzpena.gob.ar">NOTICIAS DEL MUNICIPIO</a>
+      <hr/>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <button mat-button color="primary" class="menu-button" (click)="drawer.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
