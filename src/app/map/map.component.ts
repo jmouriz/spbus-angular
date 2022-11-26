@@ -15,7 +15,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private map: any;
   private layer: any;
   private interval: any;
-  private _url = 'https://tecnologica.ar/position.php';
+  private _url = 'https://tecnologica.com.ar/position.php';
   private _debug = false;
   private points: any[] = [];
   private touched: boolean = false;

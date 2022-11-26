@@ -14,13 +14,15 @@ import { MatListModule } from '@angular/material/list';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MapComponent } from './map/map.component';
 import { RoutesComponent } from './routes/routes.component';
+import { RoutesMapComponent } from './routes-map/routes-map.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MainComponent,
     MapComponent,
-    RoutesComponent
+    RoutesComponent,
+    RoutesMapComponent
   ],
   imports: [
     HttpClientModule,

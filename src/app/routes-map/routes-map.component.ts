@@ -4,35 +4,28 @@ import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
 import { LocationService } from 'src/app/services/location';
 import { MarkerIcon, MarkerService } from 'src/app/services/marker';
-import { RoutesProvider } from '../providers/routes';
+import { LocalizedString } from '@angular/compiler';
 
 @Component({
-  selector: 'app-routes',
-  templateUrl: './routes.component.html',
-  styleUrls: ['./routes.component.css']
+  selector: 'app-routes-map',
+  templateUrl: './routes-map.component.html',
+  styleUrls: ['./routes-map.component.css']
 })
-export class RoutesComponent implements AfterViewInit, OnDestroy {
+export class RoutesMapComponent implements AfterViewInit, OnDestroy {
   private map: any;
   private layer: any;
   private interval: any;
-  private _routes: any;
-  private _polylines: any[] = [];
-  private _selected = 0;
-  private _debug: boolean = false;
-  private _verbose: boolean = false;
-  private _url = 'https://tecnologica.com.ar';
-  private _provider: RoutesProvider;
+  private _url = 'https://tecnologica.com.ar/position.php';
+  private _debug = false;
+  private points: any[] = [];
   private touched: boolean = false;
   private _marker: any = undefined;
   public user: boolean = false;
-  public popup: boolean = false;
 
-  constructor(private http: HttpClient, private toast: MatSnackBar) {
-    this._provider = new RoutesProvider(http);
-  }
+  constructor(private http: HttpClient, private toast: MatSnackBar) {}
 
   private initMap(): void {
-    this.map = L.map('routes', {
+    this.map = L.map('routes-map', {
       center: LocationService.center,
       zoom: 17,
       zoomControl: false
@@ -47,7 +40,6 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
         console.log(`[ ${event.latlng.lat}, ${event.latlng.lng} ],`);
         L.marker(event.latlng).addTo(this.layer);
       }
-      this.popup = false;
     });
 
     this.map.on('zoomstart', (event: any) => {
@@ -71,7 +63,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     tiles.addTo(this.map);
     this.layer = L.featureGroup().addTo(this.map);
 
-    //this.position();
+    this.position();
   }
 
   ngOnDestroy(): void {
@@ -80,54 +72,10 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.initMap();
-
-    this.position();
+    this.timer();
     this.interval = setInterval(() => {
-      this.position();
+      this.timer();
     }, 6000);
-
-    this._provider.routes().then((routes: any) => {
-      this._routes = routes;
-      this.load();
-    });
-    /*
-    this.http.get(`${this._url}/version.php`).subscribe(version => {
-      const _version = localStorage.getItem('routes-version') ?? 0;
-      if (_version < version) {
-        this.http.get(`${this._url}/routes.php`).subscribe(routes => {
-          localStorage.setItem('routes', JSON.stringify(routes));
-          localStorage.setItem('routes-version', version as any);
-          this._routes = routes;
-          this.load();
-        });
-      } else {
-        this._routes = JSON.parse(localStorage.getItem('routes') ?? '');
-        this.load();
-      }
-    });
-    */
-  }
-
-  load(): void {
-    this._routes.forEach((route: any) => {
-      const polyline = L.polyline(route.data, { 
-        weight: 10,
-        opacity: 0.5,
-        color: route.color
-      });
-      if (this._verbose && this._debug) {
-        let i = 0;
-        route.data.forEach((point: any) => {
-          const marker = L.marker(point).addTo(this.layer);
-          marker.bindPopup(`<b>${route.name}: ${i++}</b>`);
-        });
-      } else {
-        polyline.bindPopup(`<b>${route.name}</b>`);
-      }
-      this._polylines.push(polyline);
-    });
-    this.layer.addLayer(this._polylines[this._selected]);
-    this.map.fitBounds(this.layer.getBounds());
   }
 
   position(): void {
@@ -168,23 +116,23 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     this.map.fitBounds(this.layer.getBounds());
   }
 
-  toggle(): void {
-    this.popup = !this.popup;
-  }
-
-  select(index: number): void {
-    this.layer.removeLayer(this._polylines[this._selected]);
-    this.layer.addLayer(this._polylines[index]);
-    this.map.fitBounds(this.layer.getBounds());
-    this._selected = index;
-    this.popup = false;
-  }
-
-  get routes() {
-    return this._routes;
-  }
-
-  get selected() {
-    return this._selected;
+  timer(): void {
+    this.http.get(this._url).subscribe(data => {
+      (data as []).map((point: any) => {
+        const device = point.device;
+        if (device in this.points) {
+          this.points[device].setLatLng([ point.latitude, point.longitude ]);
+        } else {
+          this.points[device] = MarkerService.marker([ point.latitude, point.longitude ], MarkerIcon.BUS);
+          this.points[device].bindPopup(`Dispositivo <b>${device}</b>`);
+          this.points[device].addTo(this.layer);
+        }
+        this.position();
+      });
+      if (!this.touched) {
+        console.log('auto-center');
+        this.map.fitBounds(this.layer.getBounds());
+      }
+    });
   }
 }
