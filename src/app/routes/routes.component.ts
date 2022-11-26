@@ -20,7 +20,6 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   private _selected = 0;
   private _debug: boolean = false;
   private _verbose: boolean = false;
-  private _url = 'https://tecnologica.com.ar';
   private _provider: RoutesProvider;
   private touched: boolean = false;
   private _marker: any = undefined;
@@ -90,22 +89,6 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
       this._routes = routes;
       this.load();
     });
-    /*
-    this.http.get(`${this._url}/version.php`).subscribe(version => {
-      const _version = localStorage.getItem('routes-version') ?? 0;
-      if (_version < version) {
-        this.http.get(`${this._url}/routes.php`).subscribe(routes => {
-          localStorage.setItem('routes', JSON.stringify(routes));
-          localStorage.setItem('routes-version', version as any);
-          this._routes = routes;
-          this.load();
-        });
-      } else {
-        this._routes = JSON.parse(localStorage.getItem('routes') ?? '');
-        this.load();
-      }
-    });
-    */
   }
 
   load(): void {
@@ -131,9 +114,9 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   }
 
   position(): void {
-    if (typeof (window as any)['ready'] === 'undefined') {
-      return;
-    }
+    //if (typeof (window as any)['ready'] === 'undefined') {
+    //  return;
+    //}
     navigator.geolocation.getCurrentPosition((position) => {
       const point = position.coords;
       const distance = LocationService.distance({

@@ -5,6 +5,7 @@ import * as L from 'leaflet';
 import { LocationService } from 'src/app/services/location';
 import { MarkerIcon, MarkerService } from 'src/app/services/marker';
 import { LocalizedString } from '@angular/compiler';
+import { RoutesProvider } from '../providers/routes';
 
 @Component({
   selector: 'app-routes-map',
@@ -17,12 +18,17 @@ export class RoutesMapComponent implements AfterViewInit, OnDestroy {
   private interval: any;
   private _url = 'https://tecnologica.com.ar/position.php';
   private _debug = false;
+  private _verbose: boolean = false;
+  private _provider: RoutesProvider;
+  private _routes: any[] = [];
   private points: any[] = [];
   private touched: boolean = false;
   private _marker: any = undefined;
   public user: boolean = false;
 
-  constructor(private http: HttpClient, private toast: MatSnackBar) {}
+  constructor(private http: HttpClient, private toast: MatSnackBar) {
+    this._provider = new RoutesProvider(http);
+  }
 
   private initMap(): void {
     this.map = L.map('routes-map', {
@@ -64,6 +70,10 @@ export class RoutesMapComponent implements AfterViewInit, OnDestroy {
     this.layer = L.featureGroup().addTo(this.map);
 
     this.position();
+
+    this._provider.routes().then((routes: any) => {
+      this._routes = routes;
+    });
   }
 
   ngOnDestroy(): void {
@@ -73,15 +83,39 @@ export class RoutesMapComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.initMap();
     this.timer();
+    this.interval = setTimeout(() => {
+      this.load();
+    }, 1500);
     this.interval = setInterval(() => {
       this.timer();
     }, 6000);
   }
 
+  load(): void {
+    this._routes.forEach((route: any) => {
+      const polyline = L.polyline(route.data, { 
+        weight: 10,
+        opacity: 0.5,
+        color: route.color
+      });
+      if (this._verbose && this._debug) {
+        let i = 0;
+        route.data.forEach((point: any) => {
+          const marker = L.marker(point).addTo(this.layer);
+          marker.bindPopup(`<b>${route.name}: ${i++}</b>`);
+        });
+      } else {
+        polyline.bindPopup(`<b>${route.name}</b>`);
+      }
+      this.layer.addLayer(polyline);
+    });
+    //this.map.fitBounds(this.layer.getBounds());
+  }
+
   position(): void {
-    if (typeof (window as any)['ready'] === 'undefined') {
-      return;
-    }
+    //if (typeof (window as any)['ready'] === 'undefined') {
+    //  return;
+    //}
     navigator.geolocation.getCurrentPosition((position) => {
       const point = position.coords;
       const distance = LocationService.distance({
@@ -103,7 +137,7 @@ export class RoutesMapComponent implements AfterViewInit, OnDestroy {
       } else {
         this._marker.setLatLng(coordinates);
       }
-      //this.map.fitBounds(this.layer.getBounds());
+      this.map.flyTo(coordinates);
     }, (error) => {
       console.log('User not allowed', error);
     });

@@ -79,9 +79,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   position(): void {
-    if (typeof (window as any)['ready'] === 'undefined') {
-      return;
-    }
+    //if (typeof (window as any)['ready'] === 'undefined') {
+    //  return;
+    //}
     navigator.geolocation.getCurrentPosition((position) => {
       const point = position.coords;
       const distance = LocationService.distance({

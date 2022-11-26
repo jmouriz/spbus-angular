@@ -11,50 +11,5 @@
     <div class="route" (click)="select(index)" *ngFor="let route of routes; index as index;">
         <mat-icon color="primary">{{index == selected ? 'radio_button_checked': 'radio_button_unchecked'}}</mat-icon>
         <div class="route-label">{{route.name}}</div>
-        <!-- div class="route-label {{index == selected ? 'checked' : ''}}">{{route.name}}</div -->
     </div>
-    <!--
-    <div class="route">
-        <mat-icon color="primary">radio_button_unchecked</mat-icon>
-        <div class="route-label">RAMAL A - REGRESO</div>
-    </div>
-    <div class="route">
-        <mat-icon color="primary">radio_button_checked</mat-icon>
-        <div class="route-label checked">RAMAL B - IDA</div>
-    </div>
-    -->
-    <!--
-    <div class="route">
-        <mat-icon color="primary">check_box</mat-icon>
-        <div class="route-label checked">RAMAL A - IDA</div>
-    </div>
-    <div class="route">
-        <mat-icon color="primary">check_box_outline_blank</mat-icon>
-        <div class="route-label">RAMAL A - REGRESO</div>
-    </div>
-    <div class="route">
-        <mat-icon color="primary">check_box_outline_blank</mat-icon>
-        <div class="route-label">RAMAL B - IDA</div>
-    </div>
-    <div class="route">
-        <mat-icon color="primary">check_box_outline_blank</mat-icon>
-        <div class="route-label">RAMAL B - REGRESO</div>
-    </div>
-    <div class="route">
-        <mat-icon color="primary">check_box_outline_blank</mat-icon>
-        <div class="route-label">RAMAL D - IDA</div>
-    </div>
-    <div class="route">
-        <mat-icon color="primary">check_box</mat-icon>
-        <div class="route-label checked">RAMAL D - REGRESO</div>
-    </div>
-    <div class="route">
-        <mat-icon color="primary">check_box_outline_blank</mat-icon>
-        <div class="route-label">RAMAL E - IDA</div>
-    </div>
-    <div class="route">
-        <mat-icon color="primary">check_box_outline_blank</mat-icon>
-        <div class="route-label">RAMAL E - REGRESO</div>
-    </div>
-    -->
 </div>

@@ -1,27 +1,30 @@
-# Webapp
+# spbus-angular
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.3.2.
+Aplicación que muestra la ubicación de los colectivos de la ciudad de Presidencia Roque Sáenz Peña.
 
-## Development server
+# Tareas pendientes
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Agregar animación a la transición de los marcadores.
+- Mejorar la actualización de la ubicación del usuario.
+- Agregar animaciones para las íconos de contraer y expandir.
+- Agregar animaciones para el submenú.
+- Agregar animaciones para el popup de los recorridos.
+- Agregar una nueva sección con las paradas para todos los recorridos.
 
-## Code scaffolding
+# Tareas pendientes de código
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Separar en widgets los items del menúi.
+- Crear un proveedor de opciones para el menú.
+- Unificar la posición del usuario entre las posiciones y las rutas.
 
-## Build
+# Tareas pendientes un poco más complejas
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- Relacionar colectivos con recorridos y paradas para las más cercanas al usuario.
+- Calcular tiempos de espera.
 
-## Running unit tests
+# Pantallazos
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+![1668023191](https://github.com/jmouriz/spbus-angular/blob/main/screenshots/Screenshot_1668023191.png?raw=true)
+![1668023180](https://github.com/jmouriz/spbus-angular/blob/main/screenshots/Screenshot_1668023180.png?raw=true)
+![1668023166](https://github.com/jmouriz/spbus-angular/blob/main/screenshots/Screenshot_1668023166.png?raw=true)
+![1668023155](https://github.com/jmouriz/spbus-angular/blob/main/screenshots/Screenshot_1668023155.png?raw=true)
