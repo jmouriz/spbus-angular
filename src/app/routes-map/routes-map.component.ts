@@ -137,7 +137,9 @@ export class RoutesMapComponent implements AfterViewInit, OnDestroy {
       } else {
         this._marker.setLatLng(coordinates);
       }
-      this.map.flyTo(coordinates);
+      if (!this.touched) {
+        this.map.flyTo(coordinates);
+      }
     }, (error) => {
       console.log('User not allowed', error);
     });
