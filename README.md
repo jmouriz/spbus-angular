@@ -13,7 +13,7 @@ Aplicación que muestra la ubicación de los colectivos de la ciudad de Presiden
 
 # Tareas pendientes de código
 
-- Separar en widgets los items del menúi.
+- Separar en widgets los items del menú.
 - Crear un proveedor de opciones para el menú.
 - Unificar la posición del usuario entre las posiciones y las rutas.
 
@@ -21,6 +21,7 @@ Aplicación que muestra la ubicación de los colectivos de la ciudad de Presiden
 
 - Relacionar colectivos con recorridos y paradas para las más cercanas al usuario.
 - Calcular tiempos de espera.
+- Mostrar el sentido de circulación.
 
 # Pantallazos
 
