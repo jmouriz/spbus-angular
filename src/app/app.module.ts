@@ -12,17 +12,13 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MapComponent } from './map/map.component';
 import { RoutesComponent } from './routes/routes.component';
-import { RoutesMapComponent } from './routes-map/routes-map.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MainComponent,
-    MapComponent,
     RoutesComponent,
-    RoutesMapComponent
   ],
   imports: [
     HttpClientModule,
@@ -40,4 +36,4 @@ import { RoutesMapComponent } from './routes-map/routes-map.component';
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

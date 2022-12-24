@@ -8,8 +8,8 @@
     </button>
 </div> 
 <div class="routes control" *ngIf="popup">
-    <div class="route" (click)="select(index)" *ngFor="let route of routes; index as index;">
-        <mat-icon color="primary">{{index == selected ? 'radio_button_checked': 'radio_button_unchecked'}}</mat-icon>
+    <div class="route" (click)="check(index)" *ngFor="let route of routes; index as index;">
+        <mat-icon color="primary">{{checked(index) ? 'check_box' : 'check_box_outline_blank'}}</mat-icon>
         <div class="route-label">{{route.name}}</div>
     </div>
 </div>

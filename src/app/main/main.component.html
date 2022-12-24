@@ -8,7 +8,7 @@
     </mat-toolbar>
     <mat-nav-list>
       <hr/>
-      <a mat-list-item class="foreground-color" (click)="toggleBus()">
+      <!-- a mat-list-item class="foreground-color" (click)="toggleBus()">
         BUS <mat-icon class="suffix">{{bus ? 'expand_less' : 'expand_more'}}</mat-icon>
       </a>
       <hr/>
@@ -16,9 +16,11 @@
         <a mat-list-item class="right" routerLink="routes-map" href="#">¿DÓNDE ESTOY?</a>
         <a mat-list-item class="right" routerLink="map" href="#">¿DÓNDE ESTÁN?</a>
         <a mat-list-item class="right" routerLink="routes" href="#">RECORRIDOS</a>
-        <!-- a mat-list-item class="right" href="#">PARADAS</a -->
+        <a mat-list-item class="right" href="#">PARADAS</a>
         <hr/>
-      </div>
+      </div -->
+      <a mat-list-item class="foreground-color" routerLink="routes" href="#">RECORRIDOS</a>
+      <hr/>
       <a mat-list-item class="foreground-color" (click)="toggleSube()">
         SUBE <mat-icon class="suffix">{{sube ? 'expand_less' : 'expand_more'}}</mat-icon>
       </a>
@@ -32,6 +34,10 @@
       <hr/>
       <a mat-list-item class="foreground-color" href="https://saenzpena.gob.ar">NOTICIAS DEL MUNICIPIO</a>
       <hr/>
+      <div *ngIf="!simulated">
+        <a mat-list-item class="foreground-color" href="mailto:sugerenciasspbus@gmail.com?subject=¡Hola! Tengo una duda o sugerencia">SUGERENCIAS</a>
+        <hr/>
+      </div>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>

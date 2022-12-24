@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
 import { LocationService } from 'src/app/services/location';
 import { MarkerIcon, MarkerService } from 'src/app/services/marker';
-import { RoutesProvider } from '../providers/routes';
+import { RoutesProvider } from 'src/app/providers/routes';
 
 @Component({
   selector: 'app-routes',
@@ -15,12 +15,14 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   private map: any;
   private layer: any;
   private interval: any;
-  private _routes: any;
-  private _polylines: any[] = [];
-  private _selected = 0;
-  private _debug: boolean = false;
+  private _url = 'https://tecnologica.com.ar/position.php';
+  private _debug = false;
   private _verbose: boolean = false;
+  private _polylines: any[] = [];
   private _provider: RoutesProvider;
+  private _routes: any[] = []; //
+  private _checked: boolean[] = [];
+  private points: any[] = [];
   private touched: boolean = false;
   private _marker: any = undefined;
   public user: boolean = false;
@@ -54,6 +56,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
         this.user = true;
       }
       this.touched = true;
+      this.popup = false;
     });
 
     this.map.on('dragstart', () => {
@@ -61,6 +64,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
         this.user = true;
       }
       this.touched = true;
+      this.popup = false;
     });
 
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -70,7 +74,11 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     tiles.addTo(this.map);
     this.layer = L.featureGroup().addTo(this.map);
 
-    //this.position();
+    this.position();
+
+    this._provider.routes().then((routes: any) => {
+      this._routes = routes;
+    });
   }
 
   ngOnDestroy(): void {
@@ -79,17 +87,41 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.initMap();
-
-    this.position();
+    this.timer();
+    this.interval = setTimeout(() => {
+      this.load();
+    }, 1500);
     this.interval = setInterval(() => {
-      this.position();
+      this.timer();
     }, 6000);
-
     this._provider.routes().then((routes: any) => {
       this._routes = routes;
       this.load();
     });
   }
+
+  /*
+  load(): void {
+    this._routes.forEach((route: any) => {
+      const polyline = L.polyline(route.data, { 
+        weight: 10,
+        opacity: 0.5,
+        color: route.color
+      });
+      if (this._verbose && this._debug) {
+        let i = 0;
+        route.data.forEach((point: any) => {
+          const marker = L.marker(point).addTo(this.layer);
+          marker.bindPopup(`<b>${route.name}: ${i++}</b>`);
+        });
+      } else {
+        polyline.bindPopup(`<b>${route.name}</b>`);
+      }
+      this.layer.addLayer(polyline);
+    });
+    //this.map.fitBounds(this.layer.getBounds());
+  }
+  */
 
   load(): void {
     this._routes.forEach((route: any) => {
@@ -109,7 +141,6 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
       }
       this._polylines.push(polyline);
     });
-    this.layer.addLayer(this._polylines[this._selected]);
     this.map.fitBounds(this.layer.getBounds());
   }
 
@@ -138,7 +169,9 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
       } else {
         this._marker.setLatLng(coordinates);
       }
-      //this.map.fitBounds(this.layer.getBounds());
+      if (!this.touched) {
+        this.map.flyTo(coordinates);
+      }
     }, (error) => {
       console.log('User not allowed', error);
     });
@@ -155,19 +188,42 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     this.popup = !this.popup;
   }
 
-  select(index: number): void {
-    this.layer.removeLayer(this._polylines[this._selected]);
-    this.layer.addLayer(this._polylines[index]);
+  check(index: number): void {
+    if (this._checked[index]) {
+      this._checked[index] = false;
+      this.layer.removeLayer(this._polylines[index]);
+    } else {
+      this._checked[index] = true;
+      this.layer.addLayer(this._polylines[index]);
+    }
     this.map.fitBounds(this.layer.getBounds());
-    this._selected = index;
-    this.popup = false;
+  }
+
+  checked(index: number): boolean {
+    return this._checked[index];
+  }
+
+  timer(): void {
+    this.http.get(this._url).subscribe(data => {
+      (data as []).map((point: any) => {
+        const device = point.device;
+        if (device in this.points) {
+          this.points[device].setLatLng([ point.latitude, point.longitude ]);
+        } else {
+          this.points[device] = MarkerService.marker([ point.latitude, point.longitude ], MarkerIcon.BUS);
+          this.points[device].bindPopup(`Dispositivo <b>${device}</b>`);
+          this.points[device].addTo(this.layer);
+        }
+        this.position();
+      });
+      if (!this.touched) {
+        console.log('auto-center');
+        this.map.fitBounds(this.layer.getBounds());
+      }
+    });
   }
 
   get routes() {
     return this._routes;
-  }
-
-  get selected() {
-    return this._selected;
   }
 }

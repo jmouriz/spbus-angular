@@ -8,11 +8,8 @@
 }
 
 :host /deep/ .leaflet-div-icon {
-    font-family: 'Material Icons';
-    font-size: 24px;
-    color: #0b740b;
-    border: none;
     background: none;
+    border: none;
 }
 
 .leaflet-marker-pane > * {
@@ -29,8 +26,10 @@
 }
 
 .center-button {
+    position: fixed;
     top: 8px;
     right: 8px;
+    z-index: 1000;
 }
 
 .routes-button {
