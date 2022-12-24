@@ -5,6 +5,12 @@ import * as L from 'leaflet';
 import { LocationService } from 'src/app/services/location';
 import { MarkerIcon, MarkerService } from 'src/app/services/marker';
 import { RoutesProvider } from 'src/app/providers/routes';
+import { DevicesProvider } from 'src/app/providers/devices';
+
+enum Providers {
+  ROUTES,
+  DEVICES,
+};
 
 @Component({
   selector: 'app-routes',
@@ -15,21 +21,26 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   private map: any;
   private layer: any;
   private interval: any;
+  private points: any[] = [];
+  private touched: boolean = false;
   private _url = 'https://tecnologica.com.ar/position.php';
   private _debug = false;
   private _verbose: boolean = false;
   private _polylines: any[] = [];
-  private _provider: RoutesProvider;
-  private _routes: any[] = []; //
+  private _providers: any[];
+  private _routes: any[] = [];
+  private _devices: any[] = [];
   private _checked: boolean[] = [];
-  private points: any[] = [];
-  private touched: boolean = false;
   private _marker: any = undefined;
+  private _position: any = undefined;
   public user: boolean = false;
   public popup: boolean = false;
 
   constructor(private http: HttpClient, private toast: MatSnackBar) {
-    this._provider = new RoutesProvider(http);
+    this._providers = [
+      new RoutesProvider(http),
+      new DevicesProvider(http),
+    ];
   }
 
   private initMap(): void {
@@ -45,7 +56,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
 
     this.map.on('click', (event: any) => {
       if (this._debug) {
-        console.log(`[ ${event.latlng.lat}, ${event.latlng.lng} ],`);
+        console.info(`[ ${event.latlng.lat}, ${event.latlng.lng} ],`);
         L.marker(event.latlng).addTo(this.layer);
       }
       this.popup = false;
@@ -76,8 +87,12 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
 
     this.position();
 
-    this._provider.routes().then((routes: any) => {
+    this._providers[Providers.ROUTES].routes().then((routes: any) => {
       this._routes = routes;
+    });
+
+    this._providers[Providers.DEVICES].devices().then((devices: any) => {
+      this._devices = devices;
     });
   }
 
@@ -94,34 +109,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     this.interval = setInterval(() => {
       this.timer();
     }, 6000);
-    this._provider.routes().then((routes: any) => {
-      this._routes = routes;
-      this.load();
-    });
   }
-
-  /*
-  load(): void {
-    this._routes.forEach((route: any) => {
-      const polyline = L.polyline(route.data, { 
-        weight: 10,
-        opacity: 0.5,
-        color: route.color
-      });
-      if (this._verbose && this._debug) {
-        let i = 0;
-        route.data.forEach((point: any) => {
-          const marker = L.marker(point).addTo(this.layer);
-          marker.bindPopup(`<b>${route.name}: ${i++}</b>`);
-        });
-      } else {
-        polyline.bindPopup(`<b>${route.name}</b>`);
-      }
-      this.layer.addLayer(polyline);
-    });
-    //this.map.fitBounds(this.layer.getBounds());
-  }
-  */
 
   load(): void {
     this._routes.forEach((route: any) => {
@@ -145,17 +133,13 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   }
 
   position(): void {
-    //if (typeof (window as any)['ready'] === 'undefined') {
-    //  return;
-    //}
     navigator.geolocation.getCurrentPosition((position) => {
-      const point = position.coords;
       const distance = LocationService.distance({
-        lat: point.latitude,
-        lng: point.longitude,
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
       }, LocationService.center);
       const test: boolean = (this._debug || distance > 100);
-      const coordinates = test ? LocationService.test : [ point.latitude, point.longitude ];
+      this._position = test ? LocationService.test : [ position.coords.latitude, position.coords.longitude ];
       if (this._marker == undefined) {
         if (test) {
           const _distance = distance.toFixed(2).replace('.', ',');
@@ -163,22 +147,21 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
             duration: 5000
           });
         }
-        this._marker = MarkerService.marker(coordinates, MarkerIcon.USER);
+        this._marker = MarkerService.marker(this._position, MarkerIcon.USER);
         this._marker.addTo(this.layer);
         this._marker.bindPopup('Estás aquí');
       } else {
-        this._marker.setLatLng(coordinates);
+        this._marker.setLatLng(this._position);
       }
       if (!this.touched) {
-        this.map.flyTo(coordinates);
+        this.map.flyTo(this._position);
       }
     }, (error) => {
-      console.log('User not allowed', error);
+      console.error('User not allowed', error);
     });
   }
 
   center(): void {
-    console.log('center');
     this.touched = false;
     this.user = false;
     this.map.fitBounds(this.layer.getBounds());
@@ -207,17 +190,37 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     this.http.get(this._url).subscribe(data => {
       (data as []).map((point: any) => {
         const device = point.device;
+        const domain = this._devices[device];
+        let distance = undefined;
+        if (this._position) {
+          distance = LocationService.distance({
+            lat: point.latitude,
+            lng: point.longitude,
+          }, this._position);
+        }
         if (device in this.points) {
           this.points[device].setLatLng([ point.latitude, point.longitude ]);
         } else {
           this.points[device] = MarkerService.marker([ point.latitude, point.longitude ], MarkerIcon.BUS);
-          this.points[device].bindPopup(`Dispositivo <b>${device}</b>`);
           this.points[device].addTo(this.layer);
+        }
+        if (domain) {
+          if (distance) {
+            let _distance;
+            let _unit = 'km';
+            if (distance < 1) {
+              distance *= 1000;
+              _unit = 'm';
+            }
+            _distance = distance.toFixed(2).replace('.', ',');
+            this.points[device].bindPopup(`Estás a <b>${_distance}${_unit}</b> de la unidad <b>${domain}</b>`);
+          } else {
+            this.points[device].bindPopup(`Unidad <b>${domain}</b>`);
+          }
         }
         this.position();
       });
       if (!this.touched) {
-        console.log('auto-center');
         this.map.fitBounds(this.layer.getBounds());
       }
     });
