@@ -6,6 +6,7 @@ import { LocationService } from 'src/app/services/location';
 import { MarkerIcon, MarkerService } from 'src/app/services/marker';
 import { RoutesProvider } from 'src/app/providers/routes';
 import { DevicesProvider } from 'src/app/providers/devices';
+import { Config } from 'src/app/providers/config';
 
 enum Providers {
   ROUTES,
@@ -23,7 +24,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   private interval: any;
   private points: any[] = [];
   private touched: boolean = false;
-  private _url = 'https://tecnologica.com.ar/position.php';
+  private _url = `${Config.url}/positions/list.php`;
   private _debug = false;
   private _verbose: boolean = false;
   private _polylines: any[] = [];
@@ -47,7 +48,8 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     this.map = L.map('routes', {
       center: LocationService.center,
       zoom: 17,
-      zoomControl: false
+      zoomControl: false,
+      closePopupOnClick: true
     });
 
     L.control.zoom({
@@ -79,7 +81,8 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     });
 
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      //attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      attribution: ''
     });
 
     tiles.addTo(this.map);
@@ -190,7 +193,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
     this.http.get(this._url).subscribe(data => {
       (data as []).map((point: any) => {
         const device = point.device;
-        const domain = this._devices[device];
+        const internal = this._devices[device];
         let distance = undefined;
         if (this._position) {
           distance = LocationService.distance({
@@ -204,20 +207,23 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
           this.points[device] = MarkerService.marker([ point.latitude, point.longitude ], MarkerIcon.BUS);
           this.points[device].addTo(this.layer);
         }
-        if (domain) {
-          if (distance) {
-            let _distance;
-            let _unit = 'km';
-            if (distance < 1) {
-              distance *= 1000;
-              _unit = 'm';
-            }
-            _distance = distance.toFixed(2).replace('.', ',');
-            this.points[device].bindPopup(`Estás a <b>${_distance}${_unit}</b> de la unidad <b>${domain}</b>`);
-          } else {
-            this.points[device].bindPopup(`Unidad <b>${domain}</b>`);
+        let message;
+        if (distance) {
+          let _distance;
+          let _unit = 'km';
+          if (distance < 1) {
+            distance *= 1000;
+            _unit = 'm';
           }
+          _distance = distance.toFixed(2).replace('.', ',');
+          message = `Estás a <b>${_distance}${_unit}</b> del interno `;
         }
+        if (internal) {
+          message += `<b>${internal}</b>`;
+        } else {
+          message += `<b style="color:red">(dispositivo ${device} no registrado)</b>`;
+        }
+        this.points[device].bindPopup(message);
         this.position();
       });
       if (!this.touched) {
