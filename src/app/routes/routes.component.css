@@ -10,6 +10,7 @@
 :host /deep/ .leaflet-div-icon {
     background: none;
     border: none;
+    transition: all 5s ease 0s;
 }
 
 .leaflet-marker-pane > * {
