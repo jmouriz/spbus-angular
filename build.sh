@@ -6,7 +6,7 @@ rm -rf dist/webapp
 rm dist/*.zip
 ng build --prod --base-href /app/ --deploy-url /app/
 cd dist/webapp
-sed -i -e 's:<link.*=.favicon.ico..*>:<script src="../cordova.js"></script>:g' index.html
+sed -i -e 's:<link.*=.favicon.ico..*>:<script src="cordova.js"></script>:g' index.html
 cp ../../cordova.js .
 minify index.html > index.min.html
 mv index.min.html index.html
@@ -21,4 +21,4 @@ cp dist/webapp/* ../cordova/www/app
 mv ../cordova/www/app/index.html ../cordova/www
 rm ../cordova/www/app/cordova.js
 scp dist/bus.zip gaia:/home/juanma
-ssh gaia "cd $target; rm -f *; mv ~/bus.zip .; unzip bus.zip; rm bus.zip"
+ssh gaia "cd $target; rm -f *; mv ~/bus.zip .; unzip bus.zip; rm bus.zip; cd ..; cp -rpf app bundle; cd bundle; sed -i -e 's:/app/:#:;s:/app/::g' index.html; rm -f cordova.js; zip -9 -r spbus.zip *; cd ..; mv bundle/spbus.zip bundles; rm -rf bundle"

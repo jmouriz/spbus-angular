@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, Inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
@@ -7,6 +7,9 @@ import { MarkerIcon, MarkerService } from 'src/app/services/marker';
 import { RoutesProvider } from 'src/app/providers/routes';
 import { DevicesProvider } from 'src/app/providers/devices';
 import { Config } from 'src/app/providers/config';
+
+declare var ready: boolean;
+declare var cordova: boolean;
 
 enum Providers {
   ROUTES,
@@ -90,13 +93,13 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
 
     this.position();
 
-    this._providers[Providers.ROUTES].routes().then((routes: any) => {
-      this._routes = routes;
-    });
+    this._providers[Providers.ROUTES].routes().then((routes: any) => 
+      this._routes = routes
+    );
 
-    this._providers[Providers.DEVICES].devices().then((devices: any) => {
-      this._devices = devices;
-    });
+    this._providers[Providers.DEVICES].devices().then((devices: any) => 
+      this._devices = devices
+    );
   }
 
   ngOnDestroy(): void {
@@ -106,7 +109,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.initMap();
     this.timer();
-    this.interval = setTimeout(() => {
+    setTimeout(() => {
       this.load();
     }, 1500);
     this.interval = setInterval(() => {
@@ -115,6 +118,12 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   }
 
   load(): void {
+    if (this._routes.length == 0) {
+      setTimeout(() => {
+        this.load();
+      }, 1500);
+      return;
+    }
     this._routes.forEach((route: any) => {
       const polyline = L.polyline(route.data, { 
         weight: 10,
@@ -131,11 +140,22 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
         polyline.bindPopup(`<b>${route.name}</b>`);
       }
       this._polylines.push(polyline);
+      this._checked.push(false);
     });
     this.map.fitBounds(this.layer.getBounds());
   }
 
   position(): void {
+    if (cordova) {
+      if (ready) {
+        this.location();
+      }
+    } else {
+      this.location();
+    }
+  }
+
+  location(): void {
     navigator.geolocation.getCurrentPosition((position) => {
       const distance = LocationService.distance({
         lat: position.coords.latitude,
@@ -175,7 +195,7 @@ export class RoutesComponent implements AfterViewInit, OnDestroy {
   }
 
   check(index: number): void {
-    if (this._checked[index]) {
+    if (this.checked(index)) {
       this._checked[index] = false;
       this.layer.removeLayer(this._polylines[index]);
     } else {

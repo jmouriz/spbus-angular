@@ -6,7 +6,9 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <!-- XXX script src="../cordova.js"></script -->
+  <script>
+    var ready = false;
+  </script>
 </head>
 <body class="mat-typography">
   <app-root></app-root>
@@ -15,9 +17,9 @@
 <script>
   //if (typeof cordova != 'undefined') {
     document.addEventListener('deviceready', function() {
-      console.log('Cordova detected');
+      console.info('Cordova detected');
       
-      window.ready = true;
+      ready = true;
 
       if (cordova.platformId == 'ios') {
         return;
@@ -25,8 +27,6 @@
 
       var permissions = cordova.plugins.permissions;
 
-      console.log(permissions);
-      
       var list = [
         permissions.ACCESS_FINE_LOCATION,
         permissions.ACCESS_COARSE_LOCATION,
